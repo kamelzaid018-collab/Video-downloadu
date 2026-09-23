@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">محمل الفيديوهات</string>
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_browser">المتصفح الذكي</string>
+    <string name="nav_downloads">التحميلات</string>
+    <string name="nav_player">المشغل</string>
+    <string name="paste_url_hint">أدخل أو الصق رابط الفيديو هنا...</string>
+    <string name="btn_analyze">فحص واستخراج الجودات</string>
+    <string name="quick_sites">مواقع وتجارب سريعة</string>
+    <string name="select_quality">اختر جودة التحميل</string>
+    <string name="download_speed">سرعة التحميل</string>
+    <string name="pause">إيقاف مؤقت</string>
+    <string name="resume">استئناف</string>
+    <string name="cancel">إلغاء</string>
+    <string name="delete">حذف</string>
+    <string name="share">مشاركة</string>
+    <string name="open_video">تشغيل الفيديو</string>
+    <string name="no_downloads_yet">لا توجد تنزيلات حتى الآن</string>
+    <string name="video_detected">تم اكتشاف فيديو جاهز للتحميل!</string>
+</resources>

@@ -1,0 +1,6 @@
+{
+  "name": "محمل الفيديوهات",
+  "description": "تطبيق متطور لتحميل الفيديوهات من أي موقع الكتروني بجودات وصيغ متعددة مع متصفح ذكي ومشغل مدمج",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
