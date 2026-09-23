@@ -87,7 +87,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun BrowserScreen(
     viewModel: DownloaderViewModel,
-    initialUrl: String = "https://peach.blender.org/download/"
+    initialUrl: String = "https://archive.org/details/movies"
 ) {
     var currentUrl by remember { mutableStateOf(initialUrl) }
     var addressInput by remember { mutableStateOf(initialUrl) }
@@ -108,10 +108,10 @@ fun BrowserScreen(
     }
 
     val bookmarks = listOf(
-        "Blender Movies" to "https://peach.blender.org/download/",
-        "Archive.org" to "https://archive.org/details/movies",
-        "Google Samples" to "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/",
-        "Wikipedia Video" to "https://commons.wikimedia.org/wiki/Category:Video"
+        "Archive Movies" to "https://archive.org/details/movies",
+        "Animation Classics" to "https://archive.org/details/classic_cartoons",
+        "Wikipedia Video" to "https://commons.wikimedia.org/wiki/Category:Video",
+        "Public Domain" to "https://archive.org/details/feature_films"
     )
 
     Box(

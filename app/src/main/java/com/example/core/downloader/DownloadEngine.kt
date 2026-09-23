@@ -149,33 +149,58 @@ class DownloadEngine private constructor(private val context: Context) {
             var outputStream: FileOutputStream? = null
 
             try {
+                var currentResumeOffset = resumeOffset
                 val requestBuilder = Request.Builder()
                     .url(url)
-                    .header("User-Agent", "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36")
+                    .header("User-Agent", "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36")
+                    .header("Accept", "*/*")
 
-                if (resumeOffset > 0) {
-                    requestBuilder.header("Range", "bytes=$resumeOffset-")
+                if (currentResumeOffset > 0) {
+                    requestBuilder.header("Range", "bytes=$currentResumeOffset-")
                 }
 
-                val response = okHttpClient.newCall(requestBuilder.build()).execute()
+                var response = okHttpClient.newCall(requestBuilder.build()).execute()
+
+                // If server returns 416 (Range Not Satisfiable), reset resume offset and redownload from start
+                if (response.code == 416 && currentResumeOffset > 0) {
+                    response.close()
+                    currentResumeOffset = 0L
+                    val freshRequest = Request.Builder()
+                        .url(url)
+                        .header("User-Agent", "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36")
+                        .header("Accept", "*/*")
+                        .build()
+                    response = okHttpClient.newCall(freshRequest).execute()
+                }
+
                 if (!response.isSuccessful && response.code != 206) {
-                    throw IllegalStateException("HTTP ${response.code}: ${response.message}")
+                    val code = response.code
+                    val errorDesc = when (code) {
+                        403 -> "الموقع يمنع التنزيل المباشر (403 Forbidden)"
+                        404 -> "الملف غير موجود أو انتهت صلاحيته (404 Not Found)"
+                        410 -> "تمت إزالة الفيديو من المصدر (410 Gone)"
+                        429 -> "تم تجاوز عدد الطلبات المسموح به (429 Too Many Requests)"
+                        in 500..599 -> "خطأ في خادم الموقع ($code Server Error)"
+                        else -> "خطأ اتصال بالخادم (HTTP $code)"
+                    }
+                    response.close()
+                    throw IllegalStateException(errorDesc)
                 }
 
-                val body = response.body ?: throw IllegalStateException("Empty response body")
+                val body = response.body ?: throw IllegalStateException("لم يتم استلام أي بيانات من الخادم")
                 val responseContentLength = body.contentLength()
-                val totalBytes = if (resumeOffset > 0) {
-                    resumeOffset + responseContentLength
+                val totalBytes = if (currentResumeOffset > 0) {
+                    currentResumeOffset + responseContentLength
                 } else {
                     if (responseContentLength > 0) responseContentLength else 40_000_000L
                 }
 
                 inputStream = body.byteStream()
-                outputStream = FileOutputStream(targetFile, resumeOffset > 0)
+                outputStream = FileOutputStream(targetFile, currentResumeOffset > 0)
 
                 val buffer = ByteArray(64 * 1024)
                 var bytesRead: Int
-                var currentBytes = resumeOffset
+                var currentBytes = currentResumeOffset
 
                 var lastSpeedCalcTime = System.currentTimeMillis()
                 var bytesSinceLastCalc = 0L

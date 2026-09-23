@@ -105,7 +105,7 @@ fun MainAppScreen(
     onBrowserUrl: (String) -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(NavTab.HOME) }
-    var browserInitialUrl by remember { mutableStateOf("https://peach.blender.org/download/") }
+    var browserInitialUrl by remember { mutableStateOf("https://archive.org/details/movies") }
 
     val activeCount by viewModel.activeCount.collectAsState()
     val sheetMedia by viewModel.sheetMedia.collectAsState()

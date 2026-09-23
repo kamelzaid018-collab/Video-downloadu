@@ -235,6 +235,51 @@ fun HomeScreen(
                         )
                     )
 
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Quick test link chips
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "روابط سريعة:",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier.clickable {
+                                viewModel.onUrlChanged("https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4")
+                            }
+                        ) {
+                            Text(
+                                text = "Big Buck Bunny",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier.clickable {
+                                viewModel.onUrlChanged("https://archive.org/download/popeye_shuteye_popeye/popeye_shuteye_popeye_512kb.mp4")
+                            }
+                        ) {
+                            Text(
+                                text = "Popeye",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // Analyze / Download Button

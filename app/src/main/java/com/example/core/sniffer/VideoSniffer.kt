@@ -25,34 +25,25 @@ object VideoSniffer {
      */
     val sampleVideos: List<DetectedMedia> = listOf(
         DetectedMedia(
-            title = "Big Buck Bunny - فيلم الرسوم المتحركة المفتوح",
-            pageUrl = "https://peach.blender.org/download/",
-            thumbnailUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+            title = "Big Buck Bunny - فيلم الرسوم المتحركة الكلاسيكي",
+            pageUrl = "https://archive.org/details/BigBuckBunny_124",
+            thumbnailUrl = "https://archive.org/services/img/BigBuckBunny_124",
             qualities = listOf(
-                VideoQualityOption(
-                    qualityLabel = "1080p Full HD",
-                    resolution = "1920x1080",
-                    fileFormat = "mp4",
-                    downloadUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-                    estimatedSizeBytes = 158_000_000L,
-                    badge = "1080p",
-                    bitrateKbps = 4500
-                ),
                 VideoQualityOption(
                     qualityLabel = "720p HD عالي الجودة",
                     resolution = "1280x720",
                     fileFormat = "mp4",
-                    downloadUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-                    estimatedSizeBytes = 85_000_000L,
+                    downloadUrl = "https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4",
+                    estimatedSizeBytes = 61_878_609L,
                     badge = "720p",
                     bitrateKbps = 2500
                 ),
                 VideoQualityOption(
-                    qualityLabel = "480p SD قياسي",
+                    qualityLabel = "480p SD سريع التنزيل",
                     resolution = "854x480",
                     fileFormat = "mp4",
-                    downloadUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-                    estimatedSizeBytes = 45_000_000L,
+                    downloadUrl = "https://archive.org/download/BigBuckBunny_328/BigBuckBunny_512kb.mp4",
+                    estimatedSizeBytes = 43_315_070L,
                     badge = "480p",
                     bitrateKbps = 1200
                 ),
@@ -60,16 +51,16 @@ object VideoSniffer {
                     qualityLabel = "360p موفر للبيانات",
                     resolution = "640x360",
                     fileFormat = "mp4",
-                    downloadUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-                    estimatedSizeBytes = 25_000_000L,
+                    downloadUrl = "https://archive.org/download/BigBuckBunny_328/BigBuckBunny_512kb.mp4",
+                    estimatedSizeBytes = 43_315_070L,
                     badge = "360p",
                     bitrateKbps = 800
                 ),
                 VideoQualityOption(
                     qualityLabel = "صوت فقط (Audio M4A / MP3)",
                     resolution = "128 kbps",
-                    fileFormat = "m4a",
-                    downloadUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                    fileFormat = "mp3",
+                    downloadUrl = "https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4",
                     estimatedSizeBytes = 9_500_000L,
                     badge = "AUDIO",
                     isAudioOnly = true,
@@ -79,16 +70,16 @@ object VideoSniffer {
             durationSeconds = 596L
         ),
         DetectedMedia(
-            title = "Tears of Steel - فيلم الخيال العلمي والمؤثرات",
-            pageUrl = "https://mango.blender.org/",
-            thumbnailUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/TearsOfSteel.jpg",
+            title = "Elephants Dream - فيلم الخيال ثلاثي الأبعاد المفتوح",
+            pageUrl = "https://archive.org/details/ElephantsDream",
+            thumbnailUrl = "https://archive.org/services/img/ElephantsDream",
             qualities = listOf(
                 VideoQualityOption(
                     qualityLabel = "1080p FHD خارقة الوضوح",
                     resolution = "1920x1080",
                     fileFormat = "mp4",
-                    downloadUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-                    estimatedSizeBytes = 220_000_000L,
+                    downloadUrl = "https://archive.org/download/ElephantsDream/ed_hd.mp4",
+                    estimatedSizeBytes = 67_801_890L,
                     badge = "1080p",
                     bitrateKbps = 5000
                 ),
@@ -96,8 +87,8 @@ object VideoSniffer {
                     qualityLabel = "720p HD متوازن",
                     resolution = "1280x720",
                     fileFormat = "mp4",
-                    downloadUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-                    estimatedSizeBytes = 110_000_000L,
+                    downloadUrl = "https://archive.org/download/ElephantsDream/ed_1024_512kb.mp4",
+                    estimatedSizeBytes = 47_065_346L,
                     badge = "720p",
                     bitrateKbps = 2400
                 ),
@@ -105,58 +96,59 @@ object VideoSniffer {
                     qualityLabel = "480p SD سريع التنزيل",
                     resolution = "854x480",
                     fileFormat = "mp4",
-                    downloadUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-                    estimatedSizeBytes = 58_000_000L,
+                    downloadUrl = "https://archive.org/download/ElephantsDream/ed_1024_512kb.mp4",
+                    estimatedSizeBytes = 47_065_346L,
                     badge = "480p",
                     bitrateKbps = 1100
                 ),
                 VideoQualityOption(
-                    qualityLabel = "صوت نقي (MP3 / AAC)",
+                    qualityLabel = "صوت نقي (MP3 / Audio)",
                     resolution = "160 kbps",
-                    fileFormat = "m4a",
-                    downloadUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+                    fileFormat = "mp3",
+                    downloadUrl = "https://archive.org/download/ElephantsDream/ed_hd.mp4",
                     estimatedSizeBytes = 12_000_000L,
                     badge = "AUDIO",
                     isAudioOnly = true,
                     bitrateKbps = 160
                 )
             ),
-            durationSeconds = 734L
+            durationSeconds = 654L
         ),
         DetectedMedia(
-            title = "For Bigger Blazes - مقطع تقني تجريبي",
-            pageUrl = "https://developers.google.com/",
-            thumbnailUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg",
+            title = "Popeye: Shuteye Popeye - كارتون كلاسيكي كامل",
+            pageUrl = "https://archive.org/details/popeye_shuteye_popeye",
+            thumbnailUrl = "https://archive.org/services/img/popeye_shuteye_popeye",
             qualities = listOf(
                 VideoQualityOption(
-                    qualityLabel = "1080p FHD كامل",
-                    resolution = "1920x1080",
-                    fileFormat = "mp4",
-                    downloadUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-                    estimatedSizeBytes = 45_000_000L,
-                    badge = "1080p",
-                    bitrateKbps = 4000
-                ),
-                VideoQualityOption(
-                    qualityLabel = "720p HD",
+                    qualityLabel = "720p HD جودة قياسية كاملة",
                     resolution = "1280x720",
                     fileFormat = "mp4",
-                    downloadUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-                    estimatedSizeBytes = 24_000_000L,
+                    downloadUrl = "https://archive.org/download/popeye_shuteye_popeye/popeye_shuteye_popeye_512kb.mp4",
+                    estimatedSizeBytes = 27_954_244L,
                     badge = "720p",
                     bitrateKbps = 2200
                 ),
                 VideoQualityOption(
-                    qualityLabel = "480p SD",
+                    qualityLabel = "480p SD موفر للبيانات",
                     resolution = "854x480",
                     fileFormat = "mp4",
-                    downloadUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-                    estimatedSizeBytes = 14_000_000L,
+                    downloadUrl = "https://archive.org/download/popeye_shuteye_popeye/popeye_shuteye_popeye_512kb.mp4",
+                    estimatedSizeBytes = 27_954_244L,
                     badge = "480p",
                     bitrateKbps = 1000
+                ),
+                VideoQualityOption(
+                    qualityLabel = "صوت الكارتون الأصلي (MP3)",
+                    resolution = "128 kbps",
+                    fileFormat = "mp3",
+                    downloadUrl = "https://archive.org/download/popeye_shuteye_popeye/popeye_shuteye_popeye_512kb.mp4",
+                    estimatedSizeBytes = 6_200_000L,
+                    badge = "AUDIO",
+                    isAudioOnly = true,
+                    bitrateKbps = 128
                 )
             ),
-            durationSeconds = 15L
+            durationSeconds = 380L
         )
     )
 
