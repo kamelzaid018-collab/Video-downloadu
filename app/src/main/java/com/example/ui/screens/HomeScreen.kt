@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material3.Button
@@ -744,13 +745,34 @@ fun ActiveDownloadPreviewCard(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "${item.formattedDownloadedSize} / ${item.formattedSize}",
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                val remaining = item.formattedRemainingTime
+                if (item.status == DownloadStatus.DOWNLOADING && remaining.isNotEmpty()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = null,
+                            tint = CyanPrimary,
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = remaining,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = CyanPrimary
+                        )
+                    }
+                } else {
+                    Text(
+                        text = "${item.formattedDownloadedSize} / ${item.formattedSize}",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
                 Text(
                     text = "${item.progressPercent}%",
                     fontSize = 11.sp,

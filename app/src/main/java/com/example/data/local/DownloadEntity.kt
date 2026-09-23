@@ -47,6 +47,33 @@ data class DownloadEntity(
     val formattedSpeed: String
         get() = if (downloadSpeed > 0) "${formatByteCount(downloadSpeed)}/s" else "0 KB/s"
 
+    /**
+     * Estimates remaining time in Arabic based on remaining bytes and current download speed.
+     * e.g. "متبقي حوالي دقيقتين", "متبقي 45 ثانية", "متبقي أقل من دقيقة"
+     */
+    val formattedRemainingTime: String
+        get() {
+            if (downloadSpeed <= 0 || totalBytes <= 0 || downloadedBytes >= totalBytes) return ""
+            val remainingBytes = totalBytes - downloadedBytes
+            val remainingSeconds = (remainingBytes / downloadSpeed).coerceAtLeast(1)
+
+            return when {
+                remainingSeconds < 60 -> "يتبقى $remainingSeconds ثانية"
+                remainingSeconds < 120 -> "يتبقى حوالي دقيقة واحدة"
+                remainingSeconds < 180 -> "يتبقى حوالي دقيقتين"
+                remainingSeconds < 3600 -> {
+                    val minutes = remainingSeconds / 60
+                    val secs = remainingSeconds % 60
+                    if (secs > 0) "يتبقى $minutes دقيقة و $secs ثانية" else "يتبقى $minutes دقيقة"
+                }
+                else -> {
+                    val hours = remainingSeconds / 3600
+                    val mins = (remainingSeconds % 3600) / 60
+                    "يتبقى $hours ساعة و $mins دقيقة"
+                }
+            }
+        }
+
     companion object {
         fun formatByteCount(bytes: Long): String {
             if (bytes <= 0) return "0 B"

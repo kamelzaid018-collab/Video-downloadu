@@ -13,8 +13,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import okhttp3.ConnectionPool
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -27,9 +30,13 @@ class DownloadEngine private constructor(private val context: Context) {
     private val database = AppDatabase.getInstance(context)
     private val downloadDao: DownloadDao = database.downloadDao()
 
+    // High performance HTTP client with aggressive connection pooling & retry
     private val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
+        .connectTimeout(20, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .connectionPool(ConnectionPool(10, 5, TimeUnit.MINUTES))
+        .retryOnConnectionFailure(true)
         .followRedirects(true)
         .followSslRedirects(true)
         .build()
@@ -146,9 +153,6 @@ class DownloadEngine private constructor(private val context: Context) {
         activeJobs[downloadId]?.cancel()
 
         val job = scope.launch {
-            var inputStream: InputStream? = null
-            var outputStream: FileOutputStream? = null
-
             try {
                 var currentResumeOffset = resumeOffset
                 val requestBuilder = Request.Builder()
@@ -215,72 +219,92 @@ class DownloadEngine private constructor(private val context: Context) {
                     if (responseContentLength > 0) responseContentLength else 40_000_000L
                 }
 
-                inputStream = body.byteStream()
-                outputStream = FileOutputStream(targetFile, currentResumeOffset > 0)
+                var inStream: InputStream? = null
+                var outStream: FileOutputStream? = null
+                var bufferedIn: BufferedInputStream? = null
+                var bufferedOut: BufferedOutputStream? = null
 
-                val buffer = ByteArray(64 * 1024)
-                var bytesRead: Int
-                var currentBytes = currentResumeOffset
+                try {
+                    inStream = body.byteStream()
+                    outStream = FileOutputStream(targetFile, currentResumeOffset > 0)
+                    // High-efficiency 256KB buffer streams to maximize disk I/O throughput
+                    bufferedIn = BufferedInputStream(inStream, 256 * 1024)
+                    bufferedOut = BufferedOutputStream(outStream, 256 * 1024)
 
-                var lastSpeedCalcTime = System.currentTimeMillis()
-                var bytesSinceLastCalc = 0L
-                var currentSpeed = 0L
+                    val buffer = ByteArray(256 * 1024)
+                    var bytesRead: Int
+                    var currentBytes = currentResumeOffset
 
-                var lastDbUpdateTime = System.currentTimeMillis()
+                    var lastSpeedCalcTime = System.currentTimeMillis()
+                    var bytesSinceLastCalc = 0L
+                    var currentSpeed = 0L
 
-                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                    if (pausedIds.contains(downloadId)) {
-                        break
-                    }
+                    var lastDbUpdateTime = System.currentTimeMillis()
 
-                    outputStream.write(buffer, 0, bytesRead)
-                    currentBytes += bytesRead
-                    bytesSinceLastCalc += bytesRead
-
-                    val now = System.currentTimeMillis()
-
-                    // Calculate speed every 500ms
-                    if (now - lastSpeedCalcTime >= 500) {
-                        val durationSec = (now - lastSpeedCalcTime) / 1000.0
-                        if (durationSec > 0) {
-                            currentSpeed = (bytesSinceLastCalc / durationSec).toLong()
+                    while (bufferedIn.read(buffer).also { bytesRead = it } != -1) {
+                        if (pausedIds.contains(downloadId)) {
+                            break
                         }
-                        bytesSinceLastCalc = 0L
-                        lastSpeedCalcTime = now
+
+                        bufferedOut.write(buffer, 0, bytesRead)
+                        currentBytes += bytesRead
+                        bytesSinceLastCalc += bytesRead
+
+                        val now = System.currentTimeMillis()
+
+                        // Calculate speed every 350ms with exponential smoothing
+                        if (now - lastSpeedCalcTime >= 350) {
+                            val durationSec = (now - lastSpeedCalcTime) / 1000.0
+                            if (durationSec > 0) {
+                                val instantSpeed = (bytesSinceLastCalc / durationSec).toLong()
+                                currentSpeed = if (currentSpeed == 0L) {
+                                    instantSpeed
+                                } else {
+                                    ((instantSpeed * 0.7) + (currentSpeed * 0.3)).toLong()
+                                }
+                            }
+                            bytesSinceLastCalc = 0L
+                            lastSpeedCalcTime = now
+                        }
+
+                        // Update database every 500ms to keep progress & remaining time display responsive
+                        if (now - lastDbUpdateTime >= 500) {
+                            downloadDao.updateProgress(
+                                id = downloadId,
+                                downloaded = currentBytes,
+                                total = totalBytes,
+                                speed = currentSpeed,
+                                status = DownloadStatus.DOWNLOADING
+                            )
+                            lastDbUpdateTime = now
+                        }
                     }
 
-                    // Update database every 750ms to prevent SQLite contention
-                    if (now - lastDbUpdateTime >= 750) {
+                    bufferedOut.flush()
+
+                    if (pausedIds.contains(downloadId)) {
                         downloadDao.updateProgress(
                             id = downloadId,
                             downloaded = currentBytes,
                             total = totalBytes,
-                            speed = currentSpeed,
-                            status = DownloadStatus.DOWNLOADING
+                            speed = 0L,
+                            status = DownloadStatus.PAUSED
                         )
-                        lastDbUpdateTime = now
+                    } else {
+                        // Completed!
+                        downloadDao.updateProgress(
+                            id = downloadId,
+                            downloaded = currentBytes,
+                            total = currentBytes,
+                            speed = 0L,
+                            status = DownloadStatus.COMPLETED
+                        )
                     }
-                }
-
-                outputStream.flush()
-
-                if (pausedIds.contains(downloadId)) {
-                    downloadDao.updateProgress(
-                        id = downloadId,
-                        downloaded = currentBytes,
-                        total = totalBytes,
-                        speed = 0L,
-                        status = DownloadStatus.PAUSED
-                    )
-                } else {
-                    // Completed!
-                    downloadDao.updateProgress(
-                        id = downloadId,
-                        downloaded = currentBytes,
-                        total = currentBytes,
-                        speed = 0L,
-                        status = DownloadStatus.COMPLETED
-                    )
+                } finally {
+                    try { bufferedOut?.close() } catch (_: Exception) {}
+                    try { outStream?.close() } catch (_: Exception) {}
+                    try { bufferedIn?.close() } catch (_: Exception) {}
+                    try { inStream?.close() } catch (_: Exception) {}
                 }
             } catch (e: Exception) {
                 if (pausedIds.contains(downloadId)) {
@@ -290,12 +314,6 @@ class DownloadEngine private constructor(private val context: Context) {
                     downloadDao.updateStatus(downloadId, DownloadStatus.FAILED, e.localizedMessage ?: "فشل التنزيل")
                 }
             } finally {
-                try {
-                    inputStream?.close()
-                } catch (_: Exception) {}
-                try {
-                    outputStream?.close()
-                } catch (_: Exception) {}
                 activeJobs.remove(downloadId)
             }
         }

@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -327,8 +328,15 @@ fun DownloadCard(
 
                     Text(
                         text = when (item.status) {
-                            DownloadStatus.DOWNLOADING -> "${item.formattedDownloadedSize} من ${item.formattedSize} • ${item.formattedSpeed}"
-                            DownloadStatus.PAUSED -> "متوقف مؤقتاً • ${item.formattedDownloadedSize}"
+                            DownloadStatus.DOWNLOADING -> {
+                                val remaining = item.formattedRemainingTime
+                                if (remaining.isNotEmpty()) {
+                                    "${item.formattedDownloadedSize} من ${item.formattedSize} • ${item.formattedSpeed}"
+                                } else {
+                                    "${item.formattedDownloadedSize} من ${item.formattedSize} • ${item.formattedSpeed}"
+                                }
+                            }
+                            DownloadStatus.PAUSED -> "متوقف مؤقتاً • ${item.formattedDownloadedSize} من ${item.formattedSize}"
                             DownloadStatus.COMPLETED -> "مكتمل • ${item.formattedSize}"
                             DownloadStatus.FAILED -> "فشل التنزيل: ${item.errorMessage ?: ""}"
                             DownloadStatus.CANCELED -> "ملغي"
@@ -347,17 +355,57 @@ fun DownloadCard(
                 }
             }
 
-            // Progress Bar if in progress or paused
+            // Progress Bar and remaining time if in progress or paused
             if (item.status == DownloadStatus.DOWNLOADING || item.status == DownloadStatus.PAUSED || item.status == DownloadStatus.QUEUED) {
                 Spacer(modifier = Modifier.height(10.dp))
                 LinearProgressIndicator(
                     progress = { item.progress },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(6.dp)
-                        .clip(RoundedCornerShape(3.dp)),
+                        .height(7.dp)
+                        .clip(RoundedCornerShape(4.dp)),
                     color = if (item.status == DownloadStatus.PAUSED) AmberAccent else MaterialTheme.colorScheme.primary
                 )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val remainingText = item.formattedRemainingTime
+                    if (item.status == DownloadStatus.DOWNLOADING && remainingText.isNotEmpty()) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Schedule,
+                                contentDescription = null,
+                                tint = CyanPrimary,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = remainingText,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = CyanPrimary
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "${item.formattedDownloadedSize} / ${item.formattedSize}",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Text(
+                        text = "${item.progressPercent}%",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
