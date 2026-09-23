@@ -1,6 +1,7 @@
 package com.example.core.downloader
 
 import android.content.Context
+import android.net.Uri
 import android.os.Environment
 import com.example.data.local.AppDatabase
 import com.example.data.local.DownloadDao
@@ -154,6 +155,13 @@ class DownloadEngine private constructor(private val context: Context) {
                     .url(url)
                     .header("User-Agent", "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36")
                     .header("Accept", "*/*")
+                    .header("Accept-Language", "en-US,en;q=0.9,ar;q=0.8")
+
+                try {
+                    val uri = Uri.parse(url)
+                    val origin = "${uri.scheme}://${uri.host}"
+                    requestBuilder.header("Referer", origin)
+                } catch (_: Exception) {}
 
                 if (currentResumeOffset > 0) {
                     requestBuilder.header("Range", "bytes=$currentResumeOffset-")
@@ -163,6 +171,18 @@ class DownloadEngine private constructor(private val context: Context) {
 
                 // If server returns 416 (Range Not Satisfiable), reset resume offset and redownload from start
                 if (response.code == 416 && currentResumeOffset > 0) {
+                    response.close()
+                    currentResumeOffset = 0L
+                    val freshRequest = Request.Builder()
+                        .url(url)
+                        .header("User-Agent", "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36")
+                        .header("Accept", "*/*")
+                        .build()
+                    response = okHttpClient.newCall(freshRequest).execute()
+                }
+
+                // If server returns 403 when Range header was sent, retry once without Range header
+                if (response.code == 403 && currentResumeOffset > 0) {
                     response.close()
                     currentResumeOffset = 0L
                     val freshRequest = Request.Builder()

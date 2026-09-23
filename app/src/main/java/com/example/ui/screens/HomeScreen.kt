@@ -629,12 +629,13 @@ fun SampleVideoCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    val topBadge = sample.qualities.firstOrNull()?.badge ?: "HD"
                     Surface(
                         color = AmberAccent.copy(alpha = 0.15f),
                         shape = RoundedCornerShape(6.dp)
                     ) {
                         Text(
-                            text = "1080p FHD",
+                            text = topBadge,
                             color = AmberAccent,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
